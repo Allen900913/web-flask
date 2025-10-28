@@ -13,7 +13,7 @@ def init_db():
 
             # 建立一個預設使用者
             password_hashed = bcrypt.hashpw('123456'.encode(), bcrypt.gensalt())
-            user = User(username="root", password=password_hashed)
+            user = User(username="root", password=password_hashed , fullname="Administrator")
 
             db.session.add(user)
             db.session.commit()
