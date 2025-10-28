@@ -1,33 +1,50 @@
 version: '3.8'
+name: myblog-test-environment
+
 services:
   myblog_server:
     build: .
-    image: myblog
-    container_name: myblog_server
+    image: myblog_test:latest
+    container_name: myblog_server_test
     ports:
-      - "80:8080"
-    links:
-      - mysql_server
+      - "82:8080"
     environment:
       MYSQL_HOST: mysql_server
       MYSQL_DB: myblog_db
       MYSQL_USER: root
       MYSQL_PWD: nevertellyou
     volumes:
-      - /opt/myblog_data:/opt/myblog/data
+      - myblog_data:/opt/myblog/data
     depends_on:
       mysql_server:
         condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - myblog_network
 
   mysql_server:
     image: mysql:8.0
-    container_name: mysql_server
+    container_name: mysql_server_test
     volumes:
-      - /opt/mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: nevertellyou
       MYSQL_DATABASE: myblog_db
+      MYSQL_ROOT_HOST: '%'
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pnevertellyou"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - myblog_network
+
+volumes:
+  myblog_data:
+  mysql_data:
+
+networks:
+  myblog_network:
+    driver: bridge
