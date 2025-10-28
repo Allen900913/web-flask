@@ -1,0 +1,30 @@
+name: Lighthouse CI Performance Check
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    types: [opened, synchronize, reopened] # PR 開啟、更新、重開時觸發
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 選擇你的專案使用的 Node 版本
+
+      - name: Install dependencies
+        # 根據你使用的包管理器調整
+        run: npm install
+
+      # 執行 Lighthouse CI
+      - name: Run Lighthouse CI
+        run: npx @lhci/cli autorun
+        env:
+          # 將您的 Token 傳給 LHCI
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
